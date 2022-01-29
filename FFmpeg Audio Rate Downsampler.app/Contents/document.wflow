@@ -338,7 +338,7 @@ fi</string>
 				<key>ActionParameters</key>
 				<dict>
 					<key>source</key>
-					<string>on run {input, parameters}	set hasBrewInstalled to (input as string)	if hasBrewInstalled is not "true" then		display dialog "Brew is not installed, application will now quit. Please install brew and run this application again." buttons {"OK"}		#tell me to quit	end ifend run</string>
+					<string>on run {input, parameters}	set hasBrewInstalled to (input as string)	if hasBrewInstalled is not "true" then		display dialog "Homebrew (brew-command) is not installed, application will now quit. Please install Homebrew and run this application again." buttons {"OK"}		tell me to quit	end ifend run</string>
 				</dict>
 				<key>BundleIdentifier</key>
 				<string>com.apple.Automator.RunScript</string>
@@ -1972,103 +1972,103 @@ done</string>
 	</array>
 	<key>connectors</key>
 	<dict>
-		<key>19AB848E-263F-4D70-B085-981431E933DC</key>
-		<dict>
-			<key>from</key>
-			<string>E3ED7584-1E8B-42EA-BE55-4F25AD86B214 - E3ED7584-1E8B-42EA-BE55-4F25AD86B214</string>
-			<key>to</key>
-			<string>81E0A18A-B9A3-443F-A8C1-C9E4A09E0B3D - 81E0A18A-B9A3-443F-A8C1-C9E4A09E0B3D</string>
-		</dict>
-		<key>2CFA44D0-5975-409D-9F91-167AE864029B</key>
-		<dict>
-			<key>from</key>
-			<string>08F7D707-97ED-44E6-A17A-E7A88A59E4DA - 08F7D707-97ED-44E6-A17A-E7A88A59E4DA</string>
-			<key>to</key>
-			<string>34974C71-C2E3-476A-974B-BA3512FAABE6 - 34974C71-C2E3-476A-974B-BA3512FAABE6</string>
-		</dict>
-		<key>48A389F7-64DB-41BA-BC61-CC5E41E57544</key>
-		<dict>
-			<key>from</key>
-			<string>81E0A18A-B9A3-443F-A8C1-C9E4A09E0B3D - 81E0A18A-B9A3-443F-A8C1-C9E4A09E0B3D</string>
-			<key>to</key>
-			<string>63E48809-7698-43F8-852B-17CBF5E3D8FC - 63E48809-7698-43F8-852B-17CBF5E3D8FC</string>
-		</dict>
-		<key>5158297D-00EC-4881-A947-B2E3A6B0F0B7</key>
-		<dict>
-			<key>from</key>
-			<string>63E48809-7698-43F8-852B-17CBF5E3D8FC - 63E48809-7698-43F8-852B-17CBF5E3D8FC</string>
-			<key>to</key>
-			<string>09EDE6F9-3FA1-4E11-BF57-D0841805B333 - 09EDE6F9-3FA1-4E11-BF57-D0841805B333</string>
-		</dict>
-		<key>58924287-3ED5-4075-AAA4-BC8206A644BE</key>
-		<dict>
-			<key>from</key>
-			<string>34974C71-C2E3-476A-974B-BA3512FAABE6 - 34974C71-C2E3-476A-974B-BA3512FAABE6</string>
-			<key>to</key>
-			<string>A76B8A14-A54C-4AF0-85C5-7DB9A10E19A9 - A76B8A14-A54C-4AF0-85C5-7DB9A10E19A9</string>
-		</dict>
-		<key>5F601A96-11FF-42A6-9314-8D3EBF1095E7</key>
-		<dict>
-			<key>from</key>
-			<string>3F46976C-8C22-4CEB-9F48-DEB28A6FC86B - 3F46976C-8C22-4CEB-9F48-DEB28A6FC86B</string>
-			<key>to</key>
-			<string>E3ED7584-1E8B-42EA-BE55-4F25AD86B214 - E3ED7584-1E8B-42EA-BE55-4F25AD86B214</string>
-		</dict>
-		<key>64BCECD9-E401-4BFF-A24C-02240DB2D641</key>
-		<dict>
-			<key>from</key>
-			<string>1F2036F2-B6AF-4550-9528-13EA2E9D401A - 1F2036F2-B6AF-4550-9528-13EA2E9D401A</string>
-			<key>to</key>
-			<string>3C9261CE-E568-43BE-8486-9CE73CD6FB43 - 3C9261CE-E568-43BE-8486-9CE73CD6FB43</string>
-		</dict>
-		<key>7148A9EA-BF8D-4D8E-A725-138CA2FABAA0</key>
-		<dict>
-			<key>from</key>
-			<string>DD8708F5-175D-4673-A03F-5721474BD9D2 - DD8708F5-175D-4673-A03F-5721474BD9D2</string>
-			<key>to</key>
-			<string>84440FCA-2A8F-41D8-B957-1A08F78ED414 - 84440FCA-2A8F-41D8-B957-1A08F78ED414</string>
-		</dict>
-		<key>940C80ED-9D8F-4ADB-9C99-799384166374</key>
+		<key>1228712E-FE63-4597-A5C8-47C3B8577444</key>
 		<dict>
 			<key>from</key>
 			<string>EDFC6E20-9EFF-49A8-8F24-6BD414370328 - EDFC6E20-9EFF-49A8-8F24-6BD414370328</string>
 			<key>to</key>
 			<string>1F2036F2-B6AF-4550-9528-13EA2E9D401A - 1F2036F2-B6AF-4550-9528-13EA2E9D401A</string>
 		</dict>
-		<key>B8BAB4A9-3EC1-40C6-8577-C6692C3F591D</key>
+		<key>27300CCC-6387-4ADF-B077-40FED6EF2C53</key>
+		<dict>
+			<key>from</key>
+			<string>E3ED7584-1E8B-42EA-BE55-4F25AD86B214 - E3ED7584-1E8B-42EA-BE55-4F25AD86B214</string>
+			<key>to</key>
+			<string>81E0A18A-B9A3-443F-A8C1-C9E4A09E0B3D - 81E0A18A-B9A3-443F-A8C1-C9E4A09E0B3D</string>
+		</dict>
+		<key>3850FC0E-A310-4211-8887-1CDDE8A530E6</key>
 		<dict>
 			<key>from</key>
 			<string>3C9261CE-E568-43BE-8486-9CE73CD6FB43 - 3C9261CE-E568-43BE-8486-9CE73CD6FB43</string>
 			<key>to</key>
 			<string>3F46976C-8C22-4CEB-9F48-DEB28A6FC86B - 3F46976C-8C22-4CEB-9F48-DEB28A6FC86B</string>
 		</dict>
-		<key>C7E4CDF5-1485-41FD-88DF-4A564C0622DC</key>
+		<key>3DC9D4E4-A313-4137-8535-8500417B110A</key>
 		<dict>
 			<key>from</key>
-			<string>09EDE6F9-3FA1-4E11-BF57-D0841805B333 - 09EDE6F9-3FA1-4E11-BF57-D0841805B333</string>
+			<string>1F2036F2-B6AF-4550-9528-13EA2E9D401A - 1F2036F2-B6AF-4550-9528-13EA2E9D401A</string>
 			<key>to</key>
-			<string>FD967634-D236-4CF1-8344-7068F97B19DB - FD967634-D236-4CF1-8344-7068F97B19DB</string>
+			<string>3C9261CE-E568-43BE-8486-9CE73CD6FB43 - 3C9261CE-E568-43BE-8486-9CE73CD6FB43</string>
 		</dict>
-		<key>C9B4A3FB-B4D4-449D-9A06-985432C9ED30</key>
+		<key>73174863-CCF7-43D9-9499-028FE0E20A43</key>
+		<dict>
+			<key>from</key>
+			<string>84440FCA-2A8F-41D8-B957-1A08F78ED414 - 84440FCA-2A8F-41D8-B957-1A08F78ED414</string>
+			<key>to</key>
+			<string>08F7D707-97ED-44E6-A17A-E7A88A59E4DA - 08F7D707-97ED-44E6-A17A-E7A88A59E4DA</string>
+		</dict>
+		<key>7FFB45F7-6F80-499D-8596-8B2714B3F910</key>
 		<dict>
 			<key>from</key>
 			<string>FD967634-D236-4CF1-8344-7068F97B19DB - FD967634-D236-4CF1-8344-7068F97B19DB</string>
 			<key>to</key>
 			<string>8B224358-B473-4C19-893C-8F2F6BA0EA49 - 8B224358-B473-4C19-893C-8F2F6BA0EA49</string>
 		</dict>
-		<key>CC3A4AA6-A0BB-480C-8E2B-8A8B1ADD8332</key>
+		<key>89A9FC1B-07DC-4313-B8F4-35C662D2F5E9</key>
 		<dict>
 			<key>from</key>
-			<string>84440FCA-2A8F-41D8-B957-1A08F78ED414 - 84440FCA-2A8F-41D8-B957-1A08F78ED414</string>
+			<string>81E0A18A-B9A3-443F-A8C1-C9E4A09E0B3D - 81E0A18A-B9A3-443F-A8C1-C9E4A09E0B3D</string>
 			<key>to</key>
-			<string>08F7D707-97ED-44E6-A17A-E7A88A59E4DA - 08F7D707-97ED-44E6-A17A-E7A88A59E4DA</string>
+			<string>63E48809-7698-43F8-852B-17CBF5E3D8FC - 63E48809-7698-43F8-852B-17CBF5E3D8FC</string>
 		</dict>
-		<key>FE4CC908-1514-4E6C-897A-43FE676B13F6</key>
+		<key>9B4F4A1A-F5B6-4D1B-9C6F-75BE353758D7</key>
+		<dict>
+			<key>from</key>
+			<string>3F46976C-8C22-4CEB-9F48-DEB28A6FC86B - 3F46976C-8C22-4CEB-9F48-DEB28A6FC86B</string>
+			<key>to</key>
+			<string>E3ED7584-1E8B-42EA-BE55-4F25AD86B214 - E3ED7584-1E8B-42EA-BE55-4F25AD86B214</string>
+		</dict>
+		<key>A217CF0D-A4B9-48AC-A8C5-ECE9B88594D1</key>
 		<dict>
 			<key>from</key>
 			<string>A76B8A14-A54C-4AF0-85C5-7DB9A10E19A9 - A76B8A14-A54C-4AF0-85C5-7DB9A10E19A9</string>
 			<key>to</key>
 			<string>EDFC6E20-9EFF-49A8-8F24-6BD414370328 - EDFC6E20-9EFF-49A8-8F24-6BD414370328</string>
+		</dict>
+		<key>ABCF6CC6-A68E-4AA7-9FC3-8B44D69F5587</key>
+		<dict>
+			<key>from</key>
+			<string>34974C71-C2E3-476A-974B-BA3512FAABE6 - 34974C71-C2E3-476A-974B-BA3512FAABE6</string>
+			<key>to</key>
+			<string>A76B8A14-A54C-4AF0-85C5-7DB9A10E19A9 - A76B8A14-A54C-4AF0-85C5-7DB9A10E19A9</string>
+		</dict>
+		<key>AF369148-2AB9-46BD-B61A-08B29FA6B52F</key>
+		<dict>
+			<key>from</key>
+			<string>DD8708F5-175D-4673-A03F-5721474BD9D2 - DD8708F5-175D-4673-A03F-5721474BD9D2</string>
+			<key>to</key>
+			<string>84440FCA-2A8F-41D8-B957-1A08F78ED414 - 84440FCA-2A8F-41D8-B957-1A08F78ED414</string>
+		</dict>
+		<key>CE9176D7-65C2-421F-84CC-837BCF498B82</key>
+		<dict>
+			<key>from</key>
+			<string>08F7D707-97ED-44E6-A17A-E7A88A59E4DA - 08F7D707-97ED-44E6-A17A-E7A88A59E4DA</string>
+			<key>to</key>
+			<string>34974C71-C2E3-476A-974B-BA3512FAABE6 - 34974C71-C2E3-476A-974B-BA3512FAABE6</string>
+		</dict>
+		<key>EB0314CA-F74F-494D-817C-7ED710A78D20</key>
+		<dict>
+			<key>from</key>
+			<string>09EDE6F9-3FA1-4E11-BF57-D0841805B333 - 09EDE6F9-3FA1-4E11-BF57-D0841805B333</string>
+			<key>to</key>
+			<string>FD967634-D236-4CF1-8344-7068F97B19DB - FD967634-D236-4CF1-8344-7068F97B19DB</string>
+		</dict>
+		<key>F4E72262-E480-4436-9858-3319B7400427</key>
+		<dict>
+			<key>from</key>
+			<string>63E48809-7698-43F8-852B-17CBF5E3D8FC - 63E48809-7698-43F8-852B-17CBF5E3D8FC</string>
+			<key>to</key>
+			<string>09EDE6F9-3FA1-4E11-BF57-D0841805B333 - 09EDE6F9-3FA1-4E11-BF57-D0841805B333</string>
 		</dict>
 	</dict>
 	<key>variables</key>
