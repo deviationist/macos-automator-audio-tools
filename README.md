@@ -1,5 +1,5 @@
 # FFmpeg audio converter and downsampler using Automator for macOS
-Two automator-applications for macOS that allows you to use FFmpeg to convert WAV/FLAC to AIFF, M4A to MP3, and do bitrate downsampling. Perfect for DJs to prepare and convert their file.
+Useful automator-applications for macOS that allows you to use FFmpeg to convert WAV/FLAC to AIFF, M4A to MP3, do bitrate downsampling, do audio normalization. Perfect for DJs to prepare and convert their audio files.
 
 # Installation
 Make sure that you have installed Homebrew for these applications to work. Click [here](https://brew.sh/) for installation instructions.
@@ -36,4 +36,4 @@ cp Icon1024.png MyIcon.iconset/icon_512x512@2x.png
 iconutil -c icns MyIcon.iconset
 rm -R MyIcon.iconset```
 
-Find the app-file you want to apply the icon to, right click and click "Get Info". Then drag-n-drop the icon file to the upper left corner on top of the current icon. Et voila!
+Find the app-file you want to apply the icon to, right click and click "Get Info". Then drag-n-drop the icon file to the upper left corner on top of the current icon. In some cases you can also just drag-n-drop the PNG instead of creating the iconset. Et voila!
