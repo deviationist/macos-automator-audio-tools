@@ -1840,11 +1840,59 @@ end run</string>
 					<string>export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
 deleteFilesAfterDownsample=$1
 maxKhz=$2
+# Processing always re-encodes, so match the source codec, depth and bitrate.
+# Left to its own defaults ffmpeg picks by container: an .m4a becomes 128k AAC
+# even when it held lossless ALAC, and 24-bit PCM drops to 16-bit.
+encoderArgs=()
+setEncoderArgs() {
+	local file="$1"
+	local codec sampleFormat bitRate rate
+	codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nokey=1:noprint_wrappers=1 "$file" 2&gt;/dev/null)
+	sampleFormat=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_fmt -of default=nokey=1:noprint_wrappers=1 "$file" 2&gt;/dev/null)
+	bitRate=$(ffprobe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=nokey=1:noprint_wrappers=1 "$file" 2&gt;/dev/null)
+	case "$codec" in
+		pcm_*)
+			# The PCM codec name already carries both depth and endianness
+			encoderArgs=(-c:a "$codec")
+			;;
+		alac|flac)
+			encoderArgs=(-c:a "$codec")
+			[[ -n "$sampleFormat" &amp;&amp; "$sampleFormat" != "unknown" ]] &amp;&amp; encoderArgs+=(-sample_fmt "$sampleFormat")
+			;;
+		aac)
+			# Lossy in, lossy out: hold the source rate so the extra generation costs
+			# as little as possible. AAC accepts any rate, so no rounding is needed.
+			[[ "$bitRate" == &lt;-&gt; ]] || bitRate=256000
+			encoderArgs=(-c:a aac -b:a "$bitRate")
+			;;
+		mp3)
+			[[ "$bitRate" == &lt;-&gt; ]] || bitRate=320000
+			for rate in 32 40 48 56 64 80 96 112 128 160 192 224 256 320; do
+				(( rate * 1000 &gt;= bitRate )) &amp;&amp; break
+			done
+			encoderArgs=(-c:a libmp3lame -b:a "${rate}k")
+			;;
+		*)
+			# Unknown codec: let ffmpeg decide rather than force something wrong
+			encoderArgs=()
+			;;
+	esac
+}
+
 for filePath in "${@:3}"; do
 	filePathWithoutExtension="${filePath%.*}"
 	fileExtension="${filePath##*.}"
 	newFilePath="${filePathWithoutExtension}-downsampled.${fileExtension}"
-	if ffmpeg -y -nostdin -i "${filePath}" -ar $maxKhz -write_id3v2 1 -c:v copy "${newFilePath}" 2&gt;/dev/null; then
+
+	# It is a maximum, not a target: a file already at or below it is left alone,
+	# because resampling upwards invents data and costs an encode generation.
+	sourceSampleRate=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate -of default=nokey=1:noprint_wrappers=1 "${filePath}" 2&gt;/dev/null)
+	if [[ "$sourceSampleRate" == &lt;-&gt; ]] &amp;&amp; (( sourceSampleRate &lt;= maxKhz )); then
+		continue
+	fi
+
+	setEncoderArgs "${filePath}"
+	if ffmpeg -y -nostdin -i "${filePath}" -ar $maxKhz "${encoderArgs[@]}" -write_id3v2 1 -c:v copy "${newFilePath}" 2&gt;/dev/null; then
 		if [[ "$deleteFilesAfterDownsample" == "true" ]]; then
 			trash "${filePath}"
 		fi

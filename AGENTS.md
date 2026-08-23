@@ -11,8 +11,8 @@ deliverable, committed to git as a bundle.
 | App | Purpose |
 | --- | --- |
 | `FFmpeg Audio Converter.app` | FLAC/WAV → AIFF, ALAC `.m4a` → AIFF; AAC left untouched |
-| `FFmpeg Audio Rate Downsampler.app` | Re-encode to a chosen max sample rate, same container |
-| `FFmpeg Audio Normalizer.app` | `loudnorm` normalization, same container |
+| `FFmpeg Audio Rate Downsampler.app` | Resample down to a chosen max rate; files already below it are skipped |
+| `FFmpeg Audio Normalizer.app` | `loudnorm` normalization, source codec and depth preserved |
 | `Audio File Evaluator.app` | Find corrupt MP3s with `mp3val`, offer to trash them |
 
 ## Where the logic lives
@@ -110,6 +110,14 @@ These hold across all four apps. Breaking one is a regression, not a style choic
   environment, so without it nothing works on Apple Silicon.
 - **FFmpeg is always `-y -nostdin`.** See the note below on why this is not
   cosmetic.
+- **Any re-encode pins codec, sample format, bitrate and sample rate to the
+  source.** FFmpeg's defaults are chosen by container and are actively
+  destructive here: an `.m4a` re-encodes to 128k AAC even when it held lossless
+  ALAC, 24-bit PCM drops to 16-bit, and `loudnorm` emits 192 kHz unless `-ar`
+  says otherwise. Probe the source with ffprobe and pass the values explicitly.
+- **`loudnorm` needs `asetnsamples` after it.** It emits 384000-sample frames,
+  which exceeds FLAC's maximum block size, so the encoder fails to open and
+  writes a 0-byte file. `-af "loudnorm,asetnsamples=n=4096:p=0"`.
 
 ## Known quirks (deliberate, or not yet fixed)
 
