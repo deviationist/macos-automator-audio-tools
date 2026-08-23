@@ -1,21 +1,23 @@
 # FFmpeg audio converter and downsampler using Automator for macOS
-Useful automator-applications for macOS that allows you to use FFmpeg to convert WAV/FLAC to AIFF, M4A to MP3 (AAC) or AIFF (ALAC), do bitrate downsampling, do audio normalization. Perfect for DJs to prepare and convert their audio files.
+Useful automator-applications for macOS that allows you to use FFmpeg to convert WAV/FLAC/ALAC to AIFF, do bitrate downsampling, do audio normalization. Perfect for DJs to prepare and convert their audio files.
 
 # Applications
 
 ## FFmpeg Audio Converter
-Converts dropped files based on their format. `.m4a` can hold either lossy AAC or lossless ALAC, so the audio codec - not the file extension - decides the target format:
+Converts lossless files to AIFF. `.m4a` can hold either lossy AAC or lossless ALAC, so the audio codec - not the file extension - decides what happens:
 
 | Input | Audio codec | Output |
 | --- | --- | --- |
 | `.flac` | - | `.aiff` |
 | `.wav` | - | `.aiff` |
 | `.m4a` | ALAC (lossless) | `.aiff` |
-| `.m4a` | AAC (or anything else) | `.mp3`, VBR quality 4 (~165 kbps) |
+| `.m4a` | AAC (lossy) | left untouched |
 
-Embedded cover art and tags are carried over. AIFF output keeps the bit depth of the source, so a 24-bit FLAC stays 24-bit.
+**Lossy files are deliberately left alone.** Converting AAC to MP3 is a lossy-to-lossy transcode: it discards detail the source still had and produces a larger file, with nothing gained. If a player can read the `.m4a`, keeping the original AAC is always the better copy.
 
-The app asks once whether to move the source files to the trash, and only does so for files that converted successfully. M4A files whose codec cannot be read (a truncated or corrupt file, or a missing `ffprobe`) are left untouched and listed in a summary dialog at the end.
+Embedded cover art and tags are carried over. AIFF output keeps the bit depth of the source, so a 24-bit FLAC or ALAC stays 24-bit.
+
+The app asks once whether to move the source files to the trash, and only does so for files that converted successfully. M4A files whose codec cannot be read (a truncated or corrupt file, or a missing `ffprobe`) are left untouched and listed in a summary dialog at the end, since it is not possible to tell whether they were lossless.
 
 If two dropped files would produce the same output name - `song.flac` and `song.wav` both want `song.aiff` - the second one is written as `song-2.aiff` instead of overwriting the first.
 
