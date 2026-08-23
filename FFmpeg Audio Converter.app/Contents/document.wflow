@@ -447,7 +447,7 @@ end run</string>
 				<dict>
 					<key>COMMAND_STRING</key>
 					<string>export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
-if ! hash ffmpeg &amp;&gt; /dev/null
+if ! hash ffmpeg &amp;&gt; /dev/null || ! hash ffprobe &amp;&gt; /dev/null
 then
 	brew install ffmpeg
 fi
@@ -1224,34 +1224,83 @@ end run</string>
 					<key>COMMAND_STRING</key>
 					<string>export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
 deleteFilesAfterConversion=$1
+skippedFiles=()
+writtenFiles=()
+
+# AIFF is written as 16-bit unless told otherwise, so keep the depth of deeper sources
+aiffPcmCodec() {
+	local bitDepth=16
+	local value
+	for value in ${(f)"$(ffprobe -v error -select_streams a:0 -show_entries stream=bits_per_raw_sample,bits_per_sample -of default=nokey=1:noprint_wrappers=1 "$1" 2&gt;/dev/null)"}; do
+		[[ "$value" == &lt;-&gt; ]] &amp;&amp; (( value &gt; bitDepth )) &amp;&amp; bitDepth=$value
+	done
+	if (( bitDepth &gt; 24 )); then
+		echo "pcm_s32be"
+	elif (( bitDepth &gt; 16 )); then
+		echo "pcm_s24be"
+	else
+		echo "pcm_s16be"
+	fi
+}
+
 for filePath in "${@:2}"; do
-	if [[ $filePath == *.flac ]]; then
-		# FLAC to AIFF
-		newFilePath="${filePath/%.flac/.aiff}"
-		if ffmpeg -y -nostdin -i "${filePath}" -write_id3v2 1 -c:v copy "${newFilePath}" 2&gt;/dev/null; then
-			if [[ "$deleteFilesAfterConversion" == "true" ]]; then
-				trash "${filePath}"
-			fi
+	# Extensions are matched lowercased, so .FLAC, .Wav and .M4A are handled too
+	fileExtension="${${filePath##*.}:l}"
+	filePathWithoutExtension="${filePath%.*}"
+	if [[ "$fileExtension" == "flac" || "$fileExtension" == "wav" ]]; then
+		# FLAC/WAV to AIFF
+		targetExtension="aiff"
+		ffmpegArgs=(-write_id3v2 1 -c:v copy -c:a "$(aiffPcmCodec "${filePath}")")
+	elif [[ "$fileExtension" == "m4a" ]]; then
+		# .m4a holds either lossy AAC or lossless ALAC, so the codec decides the target format
+		audioCodec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nokey=1:noprint_wrappers=1 "${filePath}" 2&gt;/dev/null)
+		if [[ -z "$audioCodec" ]]; then
+			# Codec unknown (ffprobe missing, or the file is unreadable). Skip instead of
+			# guessing: guessing wrong turns lossless ALAC into MP3 and trashes the original.
+			skippedFiles+=("${filePath}")
+			continue
 		fi
-	elif [[ $filePath == *.wav ]]; then
-		# WAV to AIFF
-		newFilePath="${filePath/%.wav/.aiff}"
-		if ffmpeg -y -nostdin -i "${filePath}" -write_id3v2 1 -c:v copy "${newFilePath}" 2&gt;/dev/null; then
-			if [[ "$deleteFilesAfterConversion" == "true" ]]; then
-				trash "${filePath}"
-			fi
+		if [[ "$audioCodec" == "alac" ]]; then
+			# ALAC to AIFF
+			targetExtension="aiff"
+			ffmpegArgs=(-write_id3v2 1 -c:v copy -c:a "$(aiffPcmCodec "${filePath}")")
+		else
+			# AAC (and anything else) to MP3
+			targetExtension="mp3"
+			ffmpegArgs=(-c:v copy -c:a libmp3lame -q:a 4)
 		fi
-	elif [[ $filePath == *.m4a ]]; then
-		# M4A to MP3
-		newFilePath="${filePath/%.m4a/.mp3}"
-		if ffmpeg -y -nostdin -i "${filePath}" -c:v copy -c:a libmp3lame -q:a 4 "${newFilePath}" 2&gt;/dev/null; then
-			if [[ "$deleteFilesAfterConversion" == "true" ]]; then
-				trash "${filePath}"
-			fi
-		fi
+	else
+		continue
 	fi
 
-done</string>
+	# song.flac and song.wav dropped together both want song.aiff, so the second gets its own name
+	newFilePath="${filePathWithoutExtension}.${targetExtension}"
+	collisionSuffix=2
+	while (( ${writtenFiles[(Ie)$newFilePath]} )); do
+		newFilePath="${filePathWithoutExtension}-${collisionSuffix}.${targetExtension}"
+		(( collisionSuffix++ ))
+	done
+
+	if ffmpeg -y -nostdin -i "${filePath}" "${ffmpegArgs[@]}" "${newFilePath}" 2&gt;/dev/null; then
+		writtenFiles+=("${newFilePath}")
+		if [[ "$deleteFilesAfterConversion" == "true" ]]; then
+			trash "${filePath}"
+		fi
+	fi
+done
+
+if (( ${#skippedFiles[@]} &gt; 0 )); then
+	if ! hash ffprobe &amp;&gt; /dev/null; then
+		alertMessage="ffprobe is not installed, so M4A files could not be inspected and were skipped. Install it with: brew install ffmpeg"
+	else
+		alertMessage="The audio codec of these M4A files could not be read, so they were skipped:"$'\n'"${(F)skippedFiles}"
+	fi
+	osascript - "$alertMessage" &amp;&gt; /dev/null &lt;&lt;'APPLESCRIPT'
+on run argv
+	display alert "Some files were skipped" message (item 1 of argv)
+end run
+APPLESCRIPT
+fi</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>

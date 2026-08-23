@@ -167,7 +167,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH
+					<string>export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
 if hash brew &amp;&gt; /dev/null
 then
     echo "true"
@@ -446,7 +446,7 @@ end run</string>
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH
+					<string>export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
 if ! hash mp3val &amp;&gt; /dev/null
 then
 	brew install mp3val
@@ -733,30 +733,29 @@ fi</string>
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH
+					<string>export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
 
 files=()
 for f in "$@"
 do
-	if [ -d $f ];
-	then
-		find $f -type f -print0 | while IFS= read -d '' -r file; do
-			if ! printf '%s\n' "${files[@]}" | grep -Fxq $file; then
-				files+=($file)
-			fi
-		done
+	if [[ -d "$f" ]]; then
+		while IFS= read -r -d '' file; do
+			files+=("$file")
+		done &lt; &lt;(find "$f" -type f -print0)
 	else
-		if ! printf '%s\n' "${files[@]}" | grep -Fxq $f; then
-			files+=($f)
-		fi
+		files+=("$f")
 	fi
 done
 
+# Keep the first occurrence of each path and drop later duplicates
+typeset -U files
+
 for filePath in "${files[@]}"; do
-	if [[ $filePath == *.mp3 ]]; then
-		result=$(mp3val -si ${filePath})
+	# The extension is matched lowercased, so .MP3 is handled too
+	if [[ "${${filePath##*.}:l}" == "mp3" ]]; then
+		result=$(mp3val -si "${filePath}")
 		if [[ $result == *"Wrong number of MPEG frames"* ]] || [[ $result == *"Wrong number of MPEG data"* ]]; then
-			echo $filePath
+			echo "${filePath}"
 		fi
 	fi
 done</string>

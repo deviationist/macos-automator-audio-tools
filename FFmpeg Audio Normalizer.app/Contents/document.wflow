@@ -1247,7 +1247,7 @@ append_to_filename() {
 
 for filePath in "${@:2}"; do
 	newFilePath=$(append_to_filename "${filePath}" "-normalized")
-	if ffmpeg -i "${filePath}" -af loudnorm "${newFilePath}" 2&gt;/dev/null; then
+	if ffmpeg -y -nostdin -i "${filePath}" -af loudnorm "${newFilePath}" 2&gt;/dev/null; then
 		if [[ "$deleteFilesAfterConversion" == "true" ]]; then
 			trash "${filePath}"
 		fi
