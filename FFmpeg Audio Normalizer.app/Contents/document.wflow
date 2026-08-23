@@ -1225,28 +1225,10 @@ end run</string>
 					<string>export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
 deleteFilesAfterConversion=$1
 
-append_to_filename() {
-  local file_path="$1"
-  local append_text="$2"
-
-  local dir=$(dirname "$file_path")
-  local filename=$(basename "$file_path")
-  local base="${filename%.*}"
-  local ext="${filename##*.}"
-
-  # Check if there's actually an extension
-  if [[ "$filename" == "$ext" ]]; then
-    # No extension
-    local new_filename="${base}${append_text}"
-  else
-    local new_filename="${base}${append_text}.${ext}"
-  fi
-
-  echo "${dir}/${new_filename}"
-}
-
 for filePath in "${@:2}"; do
-	newFilePath=$(append_to_filename "${filePath}" "-normalized")
+	# zsh path modifiers: :r is the path without its extension, :e is the extension
+	fileExtension="${filePath:e}"
+	newFilePath="${filePath:r}-normalized${fileExtension:+.$fileExtension}"
 	if ffmpeg -y -nostdin -i "${filePath}" -af loudnorm "${newFilePath}" 2&gt;/dev/null; then
 		if [[ "$deleteFilesAfterConversion" == "true" ]]; then
 			trash "${filePath}"
