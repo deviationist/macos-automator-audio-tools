@@ -10,7 +10,7 @@ deliverable, committed to git as a bundle.
 
 | App | Purpose |
 | --- | --- |
-| `FFmpeg Audio Converter.app` | FLAC/WAV → AIFF, M4A → MP3 (AAC) or AIFF (ALAC) |
+| `FFmpeg Audio Converter.app` | FLAC/WAV → AIFF, ALAC `.m4a` → AIFF; AAC left untouched |
 | `FFmpeg Audio Rate Downsampler.app` | Re-encode to a chosen max sample rate, same container |
 | `FFmpeg Audio Normalizer.app` | `loudnorm` normalization, same container |
 | `Audio File Evaluator.app` | Find corrupt MP3s with `mp3val`, offer to trash them |
@@ -114,8 +114,10 @@ These hold across all four apps. Breaking one is a regression, not a style choic
 ## Known quirks (deliberate, or not yet fixed)
 
 - `Audio File Evaluator.app` handles only MP3, by design (`mp3val` is MP3-only).
-- The Converter transcodes lossless ALAC to MP3 only as a fallback for
-  non-ALAC codecs; an unreadable codec is skipped rather than guessed.
+- The Converter only ever converts lossless sources. Lossy input (AAC in a
+  `.m4a`) is left untouched by design: a lossy-to-lossy transcode discards
+  detail and enlarges the file for no gain. Do not add a "convert to MP3"
+  path back without a concrete compatibility reason.
 
 ## Why `-y -nostdin` is load-bearing
 
