@@ -22,10 +22,25 @@ The app asks once whether to move the source files to the trash, and only does s
 If two dropped files would produce the same output name - `song.flac` and `song.wav` both want `song.aiff` - the second one is written as `song-2.aiff` instead of overwriting the first.
 
 ## FFmpeg Audio Rate Downsampler
-Asks for a maximum sample rate (default 48000) and re-encodes each dropped file to it, keeping the original format. Output is written alongside the source as `<name>-downsampled.<ext>`.
+Asks for a maximum sample rate (default 48000) and resamples each dropped file down to it. Output is written alongside the source as `<name>-downsampled.<ext>`.
+
+It is a maximum, not a target: a file already at or below the given rate is left alone rather than being resampled upwards.
 
 ## FFmpeg Audio Normalizer
-Applies FFmpeg's `loudnorm` filter to each dropped file, keeping the original format. Output is written alongside the source as `<name>-normalized.<ext>`.
+Applies FFmpeg's `loudnorm` filter to each dropped file. Output is written alongside the source as `<name>-normalized.<ext>`.
+
+## What both of them preserve
+Normalizing and downsampling both re-encode the audio, so both apps match the output to the source instead of letting FFmpeg pick container defaults:
+
+| Source | Output |
+| --- | --- |
+| ALAC | ALAC at the same bit depth |
+| FLAC | FLAC at the same bit depth |
+| WAV / AIFF | the same PCM format, so 24-bit stays 24-bit |
+| AAC | AAC at the source bitrate |
+| MP3 | MP3 at the source bitrate |
+
+Sample rate is preserved too (except when the downsampler is deliberately lowering it). A lossy source cannot be normalized or downsampled without re-encoding it, but holding the codec and bitrate keeps that cost to a minimum - a measured -76 dBFS difference for one pass, against the -inf of an untouched file.
 
 ## Audio File Evaluator
 Scans dropped MP3 files (and recurses into dropped folders) with `mp3val` to find corrupt files, then offers to move the ones you select to the trash. MP3 only.

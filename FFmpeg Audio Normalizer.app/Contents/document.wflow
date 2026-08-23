@@ -1225,11 +1225,59 @@ end run</string>
 					<string>export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
 deleteFilesAfterConversion=$1
 
+# Processing always re-encodes, so match the source codec, depth and bitrate.
+# Left to its own defaults ffmpeg picks by container: an .m4a becomes 128k AAC
+# even when it held lossless ALAC, and 24-bit PCM drops to 16-bit.
+encoderArgs=()
+setEncoderArgs() {
+	local file="$1"
+	local codec sampleFormat bitRate rate
+	codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nokey=1:noprint_wrappers=1 "$file" 2&gt;/dev/null)
+	sampleFormat=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_fmt -of default=nokey=1:noprint_wrappers=1 "$file" 2&gt;/dev/null)
+	bitRate=$(ffprobe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=nokey=1:noprint_wrappers=1 "$file" 2&gt;/dev/null)
+	case "$codec" in
+		pcm_*)
+			# The PCM codec name already carries both depth and endianness
+			encoderArgs=(-c:a "$codec")
+			;;
+		alac|flac)
+			encoderArgs=(-c:a "$codec")
+			[[ -n "$sampleFormat" &amp;&amp; "$sampleFormat" != "unknown" ]] &amp;&amp; encoderArgs+=(-sample_fmt "$sampleFormat")
+			;;
+		aac)
+			# Lossy in, lossy out: hold the source rate so the extra generation costs
+			# as little as possible. AAC accepts any rate, so no rounding is needed.
+			[[ "$bitRate" == &lt;-&gt; ]] || bitRate=256000
+			encoderArgs=(-c:a aac -b:a "$bitRate")
+			;;
+		mp3)
+			[[ "$bitRate" == &lt;-&gt; ]] || bitRate=320000
+			for rate in 32 40 48 56 64 80 96 112 128 160 192 224 256 320; do
+				(( rate * 1000 &gt;= bitRate )) &amp;&amp; break
+			done
+			encoderArgs=(-c:a libmp3lame -b:a "${rate}k")
+			;;
+		*)
+			# Unknown codec: let ffmpeg decide rather than force something wrong
+			encoderArgs=()
+			;;
+	esac
+}
+
 for filePath in "${@:2}"; do
 	# zsh path modifiers: :r is the path without its extension, :e is the extension
 	fileExtension="${filePath:e}"
 	newFilePath="${filePath:r}-normalized${fileExtension:+.$fileExtension}"
-	if ffmpeg -y -nostdin -i "${filePath}" -af loudnorm "${newFilePath}" 2&gt;/dev/null; then
+	setEncoderArgs "${filePath}"
+
+	# loudnorm outputs at 192 kHz unless told otherwise, which would resample every
+	# file upwards. Pin the output back to whatever the source ran at.
+	sourceSampleRate=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate -of default=nokey=1:noprint_wrappers=1 "${filePath}" 2&gt;/dev/null)
+	[[ "$sourceSampleRate" == &lt;-&gt; ]] &amp;&amp; encoderArgs+=(-ar "$sourceSampleRate")
+
+	# loudnorm emits 384000-sample frames, which exceeds FLAC's maximum block size and
+	# makes the encoder fail outright. asetnsamples chunks them back to a normal size.
+	if ffmpeg -y -nostdin -i "${filePath}" -af "loudnorm,asetnsamples=n=4096:p=0" "${encoderArgs[@]}" -c:v copy "${newFilePath}" 2&gt;/dev/null; then
 		if [[ "$deleteFilesAfterConversion" == "true" ]]; then
 			trash "${filePath}"
 		fi
